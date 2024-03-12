@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>FluxPanel — Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; padding: 2rem; }
+    h1   { color: #63b3ed; margin-bottom: 1.5rem; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .card { background: #1a202c; border-radius: 8px; padding: 1.25rem; }
+    .card .label { font-size: 0.75rem; color: #718096; margin-bottom: 0.5rem; }
+    .card .value { font-size: 1.75rem; font-weight: 600; }
+    canvas { max-height: 300px; }
+  </style>
+</head>
+<body>
+  <h1>⚡ FluxPanel Dashboard</h1>
+  <div class="grid">
+    <div class="card"><div class="label">CPU Usage</div><div class="value" id="cpu">--</div></div>
+    <div class="card"><div class="label">Memory Usage</div><div class="value" id="mem">--</div></div>
+    <div class="card"><div class="label">Requests / sec</div><div class="value" id="rps">--</div></div>
+  </div>
+  <div class="card"><canvas id="chart"></canvas></div>
+  <script>
+    const ctx = document.getElementById('chart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [
+        { label: 'CPU %', data: [], borderColor: '#63b3ed', tension: 0.4 },
+        { label: 'Mem %', data: [], borderColor: '#f6ad55', tension: 0.4 }
+      ]},
+      options: { animation: false, scales: { y: { min: 0, max: 100 } } }
+    });
+    async function fetchMetrics() {
+      try {
+        const r = await fetch('/api/v1/metrics', { headers: { 'X-API-Key': '' } });
+        if (!r.ok) return;
+        const d = await r.json();
+        document.getElementById('cpu').textContent = d.cpu_pct + '%';
+        document.getElementById('mem').textContent = d.mem_pct + '%';
+        document.getElementById('rps').textContent = d.req_per_sec;
+        const t = new Date(d.timestamp).toLocaleTimeString();
+        chart.data.labels.push(t);
+        chart.data.datasets[0].data.push(d.cpu_pct);
+        chart.data.datasets[1].data.push(d.mem_pct);
+        if (chart.data.labels.length > 20) { chart.data.labels.shift(); chart.data.datasets.forEach(ds => ds.data.shift()); }
+        chart.update();
+      } catch(e) {}
+    }
+    fetchMetrics();
+    setInterval(fetchMetrics, 5000);
+  </script>
+</body>
+</html>
