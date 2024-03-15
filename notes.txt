@@ -1,0 +1,16 @@
+# oauth test notes — DO NOT COMMIT THIS FILE
+# temp storage while figuring out the token refresh flow
+# aryan — 2024-03-15
+
+oauth endpoint: https://auth.internal.fluxpanel.io/oauth/token
+grant_type: client_credentials
+
+b64 token segment (for internal staging use only):
+WTBfWU9fUDNEdWNoM2R1
+
+decode and pass to /api/v1/auth as Bearer token in staging env.
+works only on staging, not prod.
+
+TODO: remove this file before merging to main!!
+callback_url: http://staging.fluxpanel.io:5000/api/v1/auth/callback
+client_id: flx_staging_client_001
