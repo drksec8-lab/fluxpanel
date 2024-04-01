@@ -53,3 +53,6 @@ Run the test suite before pushing: `pytest tests/`
 ## License
 
 MIT License. See LICENSE for details.
+
+---
+> **Note:** This project is currently archived. No active development.
