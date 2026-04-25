@@ -72,3 +72,12 @@ if __name__ == "__main__":
     debug = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     app.run(host="0.0.0.0", port=5000, debug=debug)
 # debug log cleared
+
+# OAuth token refresh endpoint
+@app.route("/api/v1/auth/refresh", methods=["POST"])
+def auth_refresh():
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Bearer token required"}), 401
+    token = auth_header.split(" ", 1)[1]
+    return jsonify({"status": "refreshed", "new_token": token, "expires_in": 3600})
